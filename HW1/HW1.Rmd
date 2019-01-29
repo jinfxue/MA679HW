@@ -1,0 +1,35 @@
+---
+title: "MA679-Homework 1"
+author: "Jinfei Xue"
+date: "1/28/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 3.1
+
+Describe the null hypotheses to which the p-values given in Table 3.4 correspond. Explain what conclusions you can draw based on these p-values. Your explanation should be phrased in terms of sales, TV, radio, and newspaper, rather than in terms of the coefficients of the linear model.
+
+*The null hypotheses associated with table 3.4 are that advertising budgets of TV, radio or newspaper do not have an effect on sales. That is to say, the null hypothesis is that any of the coefficients of TV, radio or newspaper is equal to 0.*
+
+*From the table 3.4, we can see that the corresponding p-values are highly significant for TV and radio but not significant for newspaper. Therefore, we can conclude that the newspaper advertising budget is not associated with sales.*
+
+## 3.2
+
+Carefully explain the differences between the KNN classifier and KNN
+regression methods.
+
+
+
+## 3.11
+
+```{r pressure, echo=FALSE}
+set.seed (1)
+x=rnorm (100)
+y=2*x+rnorm (100)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
