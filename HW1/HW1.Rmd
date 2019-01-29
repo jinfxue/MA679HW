@@ -26,10 +26,41 @@ regression methods.
 
 ## 3.11
 
-```{r pressure, echo=FALSE}
+```{r}
+#generate a predictor x and a response y
 set.seed (1)
 x=rnorm (100)
 y=2*x+rnorm (100)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+(a) regression without intercept (y onto x)
+
+```{r}
+r11_a=lm(y~x+0)
+summary(r11_a)
+```
+
+*From the summary above, we can see that the coefficient of x is 1.9939, which means if x increases by 1 unit, then the value of y will approximately increase by 1.9939 units.*
+
+*the t-value for null hypothesis is 18.73 and the corresponding p-value is much smaller than 0.05. Therefore, we can reject the null hypothesis and indicate that x is associated with y.*
+
+*$R^2$=0.7798 is large enough to show that a large proportion of the variability in the response has been explained by the regression.*
+
+(b) regression without intercept (x onto y)
+
+```{r}
+r11_b <- lm(x ~ y + 0)
+summary(r11_b)
+```
+
+*From the summary above, we can see that the coefficient of y is 0.39111, which means if y increases by 1 unit, then the value of x will approximately increase by 0.39111 units.*
+
+*the t-value for null hypothesis is 18.73 (which is equal to the value in (a)) and the corresponding p-value is much smaller than 0.05. Therefore, we can reject the null hypothesis and indicate that y is associated with x.*
+
+*$R^2$=0.7798 (which is equal to the value in (a)) is large enough to show that a large proportion of the variability in the response has been explained by the regression.*
+
+(c) What is the relationship between the results obtained in (a) and (b)?
+
+*We obtain the same value for the t statistics and consequently the same value for the corresponding p-value, and R-squared. Both results in (a) and (b) reflect the same line created in (a).*
+
+
