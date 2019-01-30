@@ -22,6 +22,12 @@ Describe the null hypotheses to which the p-values given in Table 3.4 correspond
 Carefully explain the differences between the KNN classifier and KNN
 regression methods.
 
+## 3.5
+
+$$\hat{y_i} = \frac{(x_1y_1+x_2y_2+...+x_ny_n)x_i}{x_1^2+x_2^2+...+x_n^2} = \frac{x_1x_i}{\sum_{j=1}^{n}x_j^2}y_1+\frac{x_2x_i}{\sum_{j=1}^{n}x_j^2}y_2+...+\frac{x_nx_i}{\sum_{j=1}^{n}x_j^2}y_1$$
+$$=\sum_{i'=1}^n\frac{x_{i'}x_i}{\sum_{j=1}^nx_j^2}y_{i'}$$
+$$a_{i'}=\frac{x_{i'}x_i}{\sum_{j=1}^nx_j^2}$$
+
 
 
 ## 3.11
@@ -62,5 +68,40 @@ summary(r11_b)
 (c) What is the relationship between the results obtained in (a) and (b)?
 
 *We obtain the same value for the t statistics and consequently the same value for the corresponding p-value, and R-squared. Both results in (a) and (b) reflect the same line created in (a).*
+
+(d) Show the t-statistic formula algebraically and confirm it numerically in R;
+
+```{r}
+n <- length(x)
+t <- sqrt(n - 1)*(x %*% y)/sqrt(sum(x^2) * sum(y^2) - (x %*% y)^2)
+as.numeric(t)
+```
+
+*We can see that the t value above is exactly same as the t-statistic given in the summary of "r11_a".*
+
+(e) Using the results from (d), argue that the t-statistic for the regression of y onto x is the same as the t-statistic for the regression of x onto y.
+
+*From the formula in (d), if we replace $x_i$ with $y_i$ and replace $y_i$ with $x_i$ for t-statistics, the result would be the same.*
+
+(f) In R, show that when regression is performed with an intercept, the t-statistic is the same for the regression of y onto x as it is for the regression of x onto y.
+
+```{r}
+# the regression of y onto x
+r11_f1 <- lm(y ~ x)
+summary(r11_f1)
+
+# the regression of x onto y
+r11_f2 <- lm(x ~ y)
+summary(r11_f2)
+```
+
+*From the summary results, we can see that the t-statistic is the same for the regression of y onto x as it is for the regression of x onto y, which is equal to 18.56.*
+
+## 3.12
+
+(a)
+
+
+
 
 
