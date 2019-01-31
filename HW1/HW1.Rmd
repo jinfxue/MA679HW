@@ -19,8 +19,10 @@ Describe the null hypotheses to which the p-values given in Table 3.4 correspond
 
 ## 3.2
 
-Carefully explain the differences between the KNN classifier and KNN
-regression methods.
+Carefully explain the differences between the KNN classifier and KNN regression methods.
+
+*
+
 
 ## 3.5
 
@@ -28,6 +30,7 @@ $$\hat{y_i} = \frac{(x_1y_1+x_2y_2+...+x_ny_n)x_i}{x_1^2+x_2^2+...+x_n^2} = \fra
 $$=\sum_{i'=1}^n\frac{x_{i'}x_i}{\sum_{j=1}^nx_j^2}y_{i'}$$
 $$a_{i'}=\frac{x_{i'}x_i}{\sum_{j=1}^nx_j^2}$$
 
+## 3.6
 
 
 ## 3.11
@@ -99,7 +102,191 @@ summary(r11_f2)
 
 ## 3.12
 
-(a)
+This problem involves simple linear regression without an intercept.
+
+(a) Under what circumstance is the coefficient estimate for the regression of X onto Y the same as the coefficient estimate for the regression of Y onto X?
+
+*The coefficient estimate for the regression of Y onto X is*
+$$\hat{\beta}=\frac{\sum_{i}x_iy_i}{\sum_{j}x_j^2}$$
+*The coefficient estimate for the regression of X onto Y is*
+$$\hat{\beta'}=\frac{\sum_{i}x_iy_i}{\sum_{j}y_j^2}$$
+
+*We can see from the above two formulas the two coefficients are the same if $\sum_{j}x_j^2=\sum_{j}y_j^2$.*
+
+(b) Generate an example in R with n = 100 observations in which the coefficient estimate for the regression of X onto Y is different from the coefficient estimate for the regression of Y onto X.
+
+```{r}
+set.seed(1)
+x <- 1:100
+sum(x^2)
+y <- 2 * x + rnorm(100)
+sum(y^2)
+```
+
+*We can see $\sum_{j}x_j^2$ is different from $\sum_{j}y_j^2$*
+
+```{r}
+r12_b1 <- lm(y ~ x + 0)
+r12_b2 <- lm(x ~ y + 0)
+summary(r12_b1)
+summary(r12_b2)
+```
+
+*From summary results, we can see that the coefficient estimate for the regression of X onto Y is different from the coefficient estimate for the regression of Y onto X.*
+
+(c) Generate an example in R with n = 100 observations in which the coefficient estimate for the regression of X onto Y is the same as the coefficient estimate for the regression of Y onto X.
+
+```{r}
+set.seed(1)
+x <- 1:100
+sum(x^2)
+y <- 100:1
+sum(y^2)
+```
+
+*We can see $\sum_{j}x_j^2$ is the same as $\sum_{j}y_j^2$*
+
+```{r}
+r12_c1 <- lm(y ~ x + 0)
+r12_c2 <- lm(x ~ y + 0)
+summary(r12_c1)
+summary(r12_c2)
+```
+
+*From summary results, we can see that the coefficient estimate for the regression of X onto Y is the same as the coefficient estimate for the regression of Y onto X.*
+
+## 3.13
+
+(a) Using the rnorm() function, create a vector, x, containing 100 observations drawn from a N(0,1) distribution. This represents a feature, X.
+
+```{r}
+set.seed(1)
+x <- rnorm(100)
+```
+
+(b) Using the rnorm() function, create a vector, “eps”, containing 100 observations drawn from a N(0,0.25) distribution.
+
+```{r}
+eps <- rnorm(100, sd=sqrt(0.25))
+```
+
+(c) 
+
+```{r}
+y <- -1 + 0.5 * x + eps
+paste("the length of the vector y is", as.character(length(y)), sep = " ")
+```
+
+*In this linear model, $\beta_0=-1$, $\beta_1=0.5$.*
+
+(d) Create a scatterplot displaying the relationship between x and y. Comment on what you observe.
+
+```{r, message=FALSE, warning=FALSE}
+library(ggplot2)
+ggplot(data = as.data.frame(y,x,eps))+
+  geom_point(aes(x,y))
+```
+
+*There exists a linear relationship between x and y with some noise introduced by the eps variable.*
+
+(e) 
+
+```{r}
+r13_e <- lm(y ~ x)
+summary(r13_e)
+```
+
+*The p-values for t-statistics are pretty small, which indicates the coefficients in the linear model are significant.*
+
+*$\hat{\beta_0}=-1.01885, \hat{\beta_1}=0.49947$*
+
+*The values of $\hat{\beta_0}$ and $\hat{\beta_1}$ are pretty close to the values of ${\beta_0}$ and ${\beta_1}$.*
+
+(f) 
+
+```{r}
+plot(x, y)
+abline(r13_e, col = "red")
+abline(-1, 0.5, col = "blue")
+legend("topleft", c("Least Squares Line", "Population Regression Line"), col = c("red", "blue"), lty = c(1, 1))
+```
+
+(g) Now fit a polynomial regression model
+
+```{r}
+r13_g <- lm(y ~ poly(x,2,raw = TRUE))
+# r13_g <- lm(y ~ x + I(x^2))
+summary(r13_g)
+```
+
+*The coefficient of $x^2$ is not significant, so there is not sufficient evidence to show the quadratic term can improve the model even if the $R^2$ is little higher.*
+
+(h) Repeat (a)-(f) after modifying the data generation process in such a way that there is less noise in the data. The initial model should remain the same. Describe your results.
+
+```{r}
+# generate variables
+set.seed(1)
+eps <- rnorm(100, sd = 0.1)
+x <- rnorm(100)
+y <- -1 + 0.5 * x + eps
+
+# regression
+r13_h <- lm(y ~ x)
+summary(r13_h)
+
+# plot the relationship
+plot(x, y)
+abline(r13_h, col = "red")
+abline(-1, 0.5, col = "blue")
+legend("topleft", c("Least Squares Line", "Population Regression Line"), col = c("red", "blue"), lty = c(1, 1))
+
+```
+
+*We reduced the noise by decreasing the variance of the normal distribution used to generate the error term $\epsilon$. We may see that the coefficients are very close to those in population regression. Besides, $R^2$ is much higher and RSE is much lower than the previous one. Moreover, the two lines are very close to each other.*
+
+(i) Repeat (a)–(f) after modifying the data generation process in such a way that there is more noise in the data.
+
+```{r}
+# generate variables
+set.seed(1)
+eps <- rnorm(100, sd = 0.8)
+x <- rnorm(100)
+y <- -1 + 0.5 * x + eps
+
+# regression
+r13_i <- lm(y ~ x)
+summary(r13_i)
+
+# plot the relationship
+plot(x, y)
+abline(r13_i, col = "red")
+abline(-1, 0.5, col = "blue")
+legend("topleft", c("Least Squares Line", "Population Regression Line"), col = c("red", "blue"), lty = c(1, 1))
+```
+
+*We increased the noise by increasing the variance of the normal distribution used to generate the error term $\epsilon$. We can see that the coefficients are close to those in population regression. However, $R^2$ is much lower and RSE is much higher than the previous one. Moreover, the two lines are wider apart but are still close to each other.*
+
+(j) confidence intervals 
+
+```{r}
+# the original data set
+confint(r13_e)
+
+# the less noisy data set
+confint(r13_h)
+
+# the noisier data set
+confint(r13_i)
+```
+
+*As the deviation of noise increases, the confidence intervals widen. With less noise, there is more predictability in the data set.*
+
+
+
+
+
+
+
 
 
 
