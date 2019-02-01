@@ -21,7 +21,7 @@ Describe the null hypotheses to which the p-values given in Table 3.4 correspond
 
 Carefully explain the differences between the KNN classifier and KNN regression methods.
 
-*
+*The KNN classifier is typically used to solve classification problems (those with a qualitative response) by identifying the neighborhood of $x_0$ and then estimating the conditional probability $P(Y=j|X=x_0)$ for class j as the fraction of points in the neighborhood whose response values equal j. The KNN regression method is used to solve regression problems (those with a quantitative response) by again identifying the neighborhood of $x_0$ and then estimating $f(x_0)$ as the average of all the training responses in the neighborhood.*
 
 
 ## 3.5
@@ -31,6 +31,10 @@ $$=\sum_{i'=1}^n\frac{x_{i'}x_i}{\sum_{j=1}^nx_j^2}y_{i'}$$
 $$a_{i'}=\frac{x_{i'}x_i}{\sum_{j=1}^nx_j^2}$$
 
 ## 3.6
+
+*The least squares line equation is $y=\hat{\beta_0}+\hat{\beta_1}x$, so if we substitute $\bar{x}$ for x we obtain $y=\hat{\beta_0}+\hat{\beta_1}x=\bar{y}-\hat{\beta_1}\bar{x}+\hat{\beta_1}\bar{x}=\bar{y}$.*
+
+*Therefore, we can conclude that the least square line passes through the point $(\bar{x},\bar{y})$.*
 
 
 ## 3.11
@@ -73,6 +77,10 @@ summary(r11_b)
 *We obtain the same value for the t statistics and consequently the same value for the corresponding p-value, and R-squared. Both results in (a) and (b) reflect the same line created in (a).*
 
 (d) Show the t-statistic formula algebraically and confirm it numerically in R;
+
+Given ${t = \frac{\beta}{SE\left(\beta\right)}}$ and  ${SE\left(\beta\right)}=\sqrt{\frac{\sum{\left(y_i-\beta x_i\right)^2}}{\left(n-1\right)\sum{x_i^2}}}$ and $\beta=\frac{\sum{x_i y_i}}{\sum{x_i^2}}$
+
+Substituting ${\beta}$ into $t$ we get: ${t=\frac{\sqrt{n-1} \sum{x_i y_i}}{\sqrt{\sum{x_i^2}}\sqrt{\sum{y_i^2-2 \sum{ y_i x_i \frac{\sum{x_i y_i}}{\sum{x_i^2}}}+\sum{\left(\frac{\sum{x_i y_i}}{\sum{x_i^2}}\right)^2 x_i^2}}}}}$
 
 ```{r}
 n <- length(x)
@@ -279,16 +287,90 @@ confint(r13_h)
 confint(r13_i)
 ```
 
-*As the deviation of noise increases, the confidence intervals widen. With less noise, there is more predictability in the data set.*
+*Larger the deviation of noise is, wider the confidence intervals are. With less noise, there is more predictability in the data set.*
+
+## 3.14
+
+(a) The last line corresponds to creating a linear model in which y is a function of x1 and x2. Write out the form of the linear model. What are the regression coefficients?
+
+```{r}
+set.seed (1)
+x1=runif (100)
+x2 =0.5* x1+rnorm (100) /10
+y=2+2* x1 +0.3* x2+rnorm (100)
+```
+
+*The form of the linear model is:*
+$$Y=2+2X_1+0.3X_2+\epsilon$$
+
+*$\beta_0=2$, $\beta_1=2$, $\beta_2=0.3$.*
+
+(b) What is the correlation between x1 and x2? Create a scatterplot displaying the relationship between the variables.
+
+```{r}
+cor(x1,x2)
+plot(x1,x2)
+```
+
+*From both correlation value and scatterplot, we can see x1 and x2 is highly correlated with each other.*
+
+(c) Using this data, fit a least squares regression to predict y using x1 and x2. Describe the results obtained.
+
+```{r}
+r14_c <- lm(y ~ x1 + x2)
+summary(r14_c)
+```
+
+*$\hat{\beta_0}=2.1305$, $\hat{\beta_1}=1.4396$, $\hat{\beta_2}=1.0097$. Only the value of $\hat{\beta_0}$ is very close to that of $\beta_0$. Because the p-value for $\beta_1$ is smaller than 0.05, we can reject the null hypothesis. However, the p-value for $\beta_2$ is bigger than 0.05, so we cannot reject $H_0$.*
+
+(d) Now fit a least squares regression to predict y using only x1. Comment on your results.
+
+```{r}
+r14_d <- lm(y ~ x1)
+summary(r14_d)
+```
+
+*The coefficient for x1 in this model is very different from that in (c). In this case because the p-value for x1 is very low, we can reject $H_0$, which indicates that x1 is highly significant.*
+
+(e) Now fit a least squares regression to predict y using only x2. Comment on your results.
+
+```{r}
+r14_e <- lm(y ~ x2)
+summary(r14_e)
+```
+
+*The coefficient for x2 in this model is very different from that in (c). In this case because the p-value for x2 is very low, we can reject $H_0$, which indicates that x2 is highly significant.*
+
+(f) Do the results obtained in (c)–(e) contradict each other? Explain your answer.
+
+*No, the results do not contradict each other. As the predictors x1 and x2 are highly correlated, there exists collinearity between x1 and x2. In this case it can be difficult to determine how each predictor separately is associated with the response. Since collinearity reduces the accuracy of the coefficients estimation. Consequently, we may fail to reject $H_0$ in the presence of collinearity. The importance of the x2 variable has been masked due to the presence of collinearity.*
 
 
+(g)
+
+```{r}
+x1=c(x1 , 0.1)
+x2=c(x2 , 0.8)
+y=c(y,6)
+```
+
+```{r}
+r14_c2 <- lm(y ~ x1 + x2)
+r14_d2 <- lm(y ~ x1)
+r14_e2 <- lm(y ~ x2)
+summary(r14_c2)
+summary(r14_d2)
+summary(r14_e2)
+```
+
+```{r}
+plot(r14_c2)
+plot(r14_d2)
+plot(r14_e2)
+```
 
 
-
-
-
-
-
+*In the model with two predictors, the last point is a high-leverage point. In the model with x1 as sole predictor, the last point is an outlier. In the model with x2 as sole predictor, the last point is a high-leverage point.*
 
 
 
