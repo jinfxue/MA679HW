@@ -1,0 +1,103 @@
+---
+title: "Homework 3 Classification"
+author: "Jinfei Xue"
+date: "2/6/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 4.6
+
+## (a)
+
+*We can obtain the logistic regression:*
+
+$$logit(p)=-6+0.05X_1+X_2$$
+
+```{r}
+library(boot)
+inv.logit(-6+0.05*40+3.5)
+```
+
+*So the estimated probability that a student who studies for 40 h and has an undergrad GPA of 3.5 gets an A in the class is 0.3775407.*
+
+## (b)
+
+```{r}
+(logit(0.5)-(-6)-3.5)/0.05
+```
+
+*So the student in part (a) need to study 50 hours to have a 50% chance of getting an A in the class.*
+
+# 4.8
+
+
+# 4.9
+
+## (a) 
+
+*We can obtain:*
+
+$$\frac{p}{1-p}=0.37$$
+
+*We can transform it into:*
+
+$$p=\frac{0.37}{1+0.37}\approx0.27$$
+
+*So, on average, 27% of people with an odds of 0.37 of defaulting on their credit card payment will in fact default.*
+
+## (b)
+
+*The odds that she will default is:*
+
+$$\frac{p}{1-p}=\frac{0.16}{1-0.16}\approx0.19$$
+
+# 4.10
+
+## (a)
+
+```{r}
+library(ISLR)
+data(Weekly)
+Weekly = Weekly
+
+# numerical summary
+summary(Weekly)
+
+# graphical summary
+library(ggplot2)
+index=1:length(Weekly$Volume)
+ggplot(Weekly) + geom_point(aes(x=index,y=Volume))
+
+```
+
+*When we plot “Volume”, we can see that it is increasing over time.*
+
+## (b)
+
+```{r}
+r10_b <- glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume, 
+               data = Weekly, family = binomial)
+summary(r10_b)
+```
+
+*It would seem that "Lag2"" is the only predictor statistically significant as its p-value is less than 0.05.*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
