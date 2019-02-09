@@ -34,6 +34,11 @@ inv.logit(-6+0.05*40+3.5)
 
 # 4.8
 
+*In the case of KNN with K=1, we have a training error rate of 0% because in this case, we have:*
+
+$$P(Y=j|X=x_i)=I(y_i=j)$$
+
+*which is equal to 1 if $y_i=j$ and 0 if not. We do not make any error on the training data within this setting, that explains the 0% training error rate. However, we have an average error rate of 18% wich implies a test error rate of 36% for KNN which is greater than the test error rate for logistic regression of 30%. So, it is better to choose logistic regression because of its lower test error rate.*
 
 # 4.9
 
@@ -66,6 +71,7 @@ Weekly = Weekly
 
 # numerical summary
 summary(Weekly)
+cor(Weekly[,-9])
 
 # graphical summary
 library(ggplot2)
@@ -74,7 +80,7 @@ ggplot(Weekly) + geom_point(aes(x=index,y=Volume))
 
 ```
 
-*When we plot “Volume”, we can see that it is increasing over time.*
+*The correlations between lag variables and "Today" are close to zero. When we plot "Volume", we can see that it is increasing over time.*
 
 ## (b)
 
@@ -84,20 +90,360 @@ r10_b <- glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume,
 summary(r10_b)
 ```
 
-*It would seem that "Lag2"" is the only predictor statistically significant as its p-value is less than 0.05.*
+*We can see that "Lag2" is the only predictor statistically significant because its p-value is less than 0.05.*
+
+## (c)
+
+```{r}
+prob_b <- predict(r10_b, type = "response")
+pred_b <- rep("Down", length(prob_b))
+pred_b[prob_b > 0.5] <- "Up"
+table(pred_b, Weekly$Direction)
+mean(pred_b == Weekly$Direction)
+```
+
+*We can conclude that this logistic regression correctly predicted the movement of the market 56.10652% of the time and 43.89348% is the training error rate. We could also say that for weeks when the market goes up, the model is right 92.0661157% of the time (557/(48+557)). For weeks when the market goes down, the model is right only 11.1570248% of the time (54/(54+430)).*
+
+## (d)
+
+```{r}
+train <- Weekly[Weekly$Year<2009, ]
+r10_d <- glm(Direction ~ Lag2, data = train, family = binomial)
+summary(r10_d)
+```
+
+```{r}
+# prediction
+test <- Weekly[-(1:nrow(train)),]
+prob_d <- predict(r10_d, test, type = "response")
+pred_d <- rep("Down", length(prob_d))
+pred_d[prob_d > 0.5] <- "Up"
+table(pred_d, test$Direction)
+mean(pred_d == test$Direction)
+```
+
+*We can conclude that this new logistic regression correctly predicted the movement of the market 62.5% of the time and 37.5% is the training error rate. We could also say that for weeks when the market goes up, the model is right 91.80328% of the time (56/(56+5)). For weeks when the market goes down, the model is right only 20.93023% of the time (9/(9+34)).*
+
+## (e)
+
+```{r}
+library(MASS)
+fit.lda=lda(Direction~Lag2 ,data=train)
+fit.lda
+```
+
+```{r}
+pred.lda <- predict(fit.lda, test)
+table(pred.lda$class, test$Direction)
+mean(pred.lda$class==test$Direction)
+```
+
+*In this case, we may conclude that the percentage of correct predictions on the test data is 62.5%. In other words 37.5% is the test error rate. We could also say that for weeks when the market goes up, the model is right 91.80328% of the time. For weeks when the market goes down, the model is right only 20.93023% of the time. These results are almost same as those obtained with the logistic regression model in (d).*
+
+## (f)
+
+```{r}
+fit.qda <- qda(Direction ~ Lag2, data = train)
+fit.qda
+```
+
+```{r}
+pred.qda <- predict(fit.qda, test)
+table(pred.qda$class, test$Direction)
+mean(pred.qda$class==test$Direction)
+```
+
+*In this case, we may conclude that the percentage of correct predictions on the test data is 58.65385%. In other words 41.34615% is the test error rate. We could also say that for weeks when the market goes up, the model is right 100% of the time. For weeks when the market goes down, the model is right only 0% of the time. We may note, that QDA achieves a correctness of 58.6538462% even though the model chooses “Up” the whole time !*
+
+## (g)
+
+```{r}
+library(class)
+train.X <- as.matrix(train$Lag2)
+test.X <- as.matrix(test$Lag2)
+train.Direction <- train$Direction
+
+set.seed(1)
+pred.knn <- knn(train.X, test.X, train.Direction, k = 1)
+table(pred.knn, test$Direction)
+mean(pred.knn==test$Direction)
+```
+
+*In this case, we may conclude that the percentage of correct predictions on the test data is 50%. Therefore, the test error rate is 50%. We could also say that for weeks when the market goes up, the model is right 50.81967% of the time. For weeks when the market goes down, the model is right only 48.83721% of the time.*
+
+## (h)
+
+*If we compare the test error rates, we can see that LDA have the minimum error rates, followed by QDA and KNN.*
+
+## (i)
+
+```{r}
+# Logistic regression with interaction Lag2:Lag1
+fit.glm <- glm(Direction ~ Lag2:Lag1, data = train, family = binomial)
+
+probs <- predict(fit.glm, test, type = "response")
+pred.glm <- rep("Down", length(probs))
+pred.glm[probs > 0.5] = "Up"
+
+table(pred.glm, test$Direction)
+mean(pred.glm == test$Direction)
+```
+
+```{r}
+# LDA with interaction Lag2:Lag1
+fit.lda2 <- lda(Direction ~ Lag2:Lag1, data = train)
+pred.lda2 <- predict(fit.lda2, test)
+mean(pred.lda2$class == test$Direction)
+```
+
+```{r}
+# QDA with log transformation for Lag2
+fit.qda2 <- qda(Direction ~ log(abs(Lag2)), data = train)
+pred.qda2 <- predict(fit.qda2, test)
+table(pred.qda2$class, test$Direction)
+mean(pred.qda2$class == test$Direction)
+```
+
+```{r}
+# KNN k=100
+pred.knn2 <- knn(train.X, test.X, train.Direction, k = 100)
+table(pred.knn2, test$Direction)
+mean(pred.knn2==test$Direction)
+```
+
+*In all these combinations, the logistic regression with interaction and LDA have the best performance in terms of test error rates.*
+
+# 4.11
+
+## (a)
+
+```{r,message=FALSE}
+attach(Auto)
+mpg01 <- rep(0, length(mpg))
+mpg01[mpg > median(mpg)] <- 1
+Auto <- data.frame(Auto, mpg01)
+```
+
+## (b)
+
+```{r, message=FALSE}
+# The variable in column 9 is not numeric
+M=cor(Auto[,-9])
+M
+library(corrplot)
+corrplot(M, method = "circle")
+```
+
+```{r}
+Auto$mpg01 <- as.factor(Auto$mpg01)
+ggplot(Auto, aes(x=mpg01, y=cylinders)) + 
+  geom_boxplot() +
+  labs(title = "cylinders V.S mpg01")
+
+ggplot(Auto, aes(x=mpg01, y=displacement)) + 
+  geom_boxplot() +
+  labs(title = "displacement V.S mpg01")
+
+ggplot(Auto, aes(x=mpg01, y=horsepower)) + 
+  geom_boxplot() +
+  labs(title = "horsepower V.S mpg01")
+
+ggplot(Auto, aes(x=mpg01, y=weight)) + 
+  geom_boxplot() +
+  labs(title = "weight V.S mpg01")
+
+ggplot(Auto, aes(x=mpg01, y=acceleration)) + 
+  geom_boxplot() +
+  labs(title = "acceleration V.S mpg01")
+
+ggplot(Auto, aes(x=mpg01, y=year)) + 
+  geom_boxplot() +
+  labs(title = "year V.S mpg01")
+```
 
 
+*We may conclude that there exists some association between “mpg01” and “cylinders”, “weight”, “displacement” and “horsepower”.*
 
+## (c)
 
+```{r}
+train <- (year %% 2 == 0)
+Auto.train <- Auto[train, ]
+Auto.test <- Auto[!train, ]
+mpg01.test <- mpg01[!train]
+```
 
+## (d)
 
+```{r}
+fit.lda <- lda(mpg01 ~ cylinders + weight + displacement + horsepower, data = Auto.train)
+fit.lda
 
+pred.lda <- predict(fit.lda, Auto.test)
+table(pred.lda$class, mpg01.test)
+mean(pred.lda$class != mpg01.test)
+```
 
+*The test error rate of LDA is 12.63736%.*
 
+## (e)
 
+```{r}
+fit.qda <- qda(mpg01 ~ cylinders + weight + displacement + horsepower, data = Auto.train)
+fit.qda
 
+pred.qda <- predict(fit.qda, Auto.test)
+table(pred.qda$class, mpg01.test)
+mean(pred.qda$class != mpg01.test)
+```
 
+*The test error rate of QDA is 13.18681%.*
 
+## (f)
 
+```{r}
+fit.glm <- glm(mpg01 ~ cylinders + weight + displacement + horsepower, data = Auto.train,
+               family = binomial)
+summary(fit.glm)
 
+probs <- predict(fit.glm, Auto.test, type = "response")
+pred.glm <- rep(0, length(probs))
+pred.glm[probs > 0.5] <- 1
+table(pred.glm, mpg01.test)
+mean(pred.glm != mpg01.test)
+```
 
+*The test error rate of logistic regression is 12.08791%.*
+
+## (g)
+
+```{r}
+train.X <- cbind(cylinders, weight, displacement, horsepower)[train, ]
+test.X <- cbind(cylinders, weight, displacement, horsepower)[!train, ]
+train.mpg01 <- mpg01[train]
+
+set.seed(1)
+# k=1
+pred.knn <- knn(train.X, test.X, train.mpg01, k = 1)
+table(pred.knn, mpg01.test)
+mean(pred.knn != mpg01.test)
+# k=30
+pred.knn <- knn(train.X, test.X, train.mpg01, k = 30)
+table(pred.knn, mpg01.test)
+mean(pred.knn != mpg01.test)
+
+# k=100
+pred.knn <- knn(train.X, test.X, train.mpg01, k = 100)
+table(pred.knn, mpg01.test)
+mean(pred.knn != mpg01.test)
+
+```
+
+*We can see when k=30, the error rate is the smallest.*
+
+# 4.12
+
+## (a)
+
+```{r}
+Power <- function() {
+    2^3
+}
+
+Power()
+```
+
+## (b)
+
+```{r}
+Power2 <- function(x, a) {
+    x^a
+}
+
+Power2(3, 8)
+```
+
+## (c)
+
+```{r}
+Power2(10, 3)
+Power2(8, 17)
+Power2(131, 3)
+```
+
+## (d)
+
+```{r}
+Power3 <- function(x, a) {
+    result <- x^a
+    return(result)
+}
+```
+
+## (e)
+
+```{r}
+x <- 1:10
+plot(x, Power3(x, 2), log = "xy", xlab = "Log of x", ylab = "Log of x^2", main = "Log of x^2 vs Log of x")
+```
+
+## (f)
+
+```{r}
+PlotPower <- function(x, a) {
+    plot(x, Power3(x, a))
+}
+
+PlotPower(1:10, 3)
+```
+
+## 4.13
+
+```{r, message=FALSE, warning=FALSE}
+library(MASS)
+attach(Boston)
+crim01 <- rep(0, length(crim))
+crim01[crim > median(crim)] <- 1
+Boston <- data.frame(Boston, crim01)
+
+train <- 1:(length(crim) / 2)
+test <- (length(crim) / 2 + 1):length(crim)
+Boston.train <- Boston[train, ]
+Boston.test <- Boston[test, ]
+crim01.test <- crim01[test]
+
+# logistic regression
+fit.glm <- glm(crim01 ~ . - crim01 - crim - chas - nox, 
+               data = Boston, family = binomial, subset = train)
+# prediction
+probs <- predict(fit.glm, Boston.test, type = "response")
+pred.glm <- rep(0, length(probs))
+pred.glm[probs > 0.5] <- 1
+table(pred.glm, crim01.test)
+mean(pred.glm != crim01.test)
+```
+
+*The error rate of logistic regression is 15.81028%.*
+
+```{r}
+# LDA
+fit.lda <- lda(crim01 ~ . - crim01 - crim, data = Boston, subset = train)
+pred.lda <- predict(fit.lda, Boston.test)
+table(pred.lda$class, crim01.test)
+mean(pred.lda$class != crim01.test)
+```
+
+*The error rate of LDA is 13.43874%.*
+
+```{r}
+train.X <- cbind(zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, black, lstat, medv)[train, ]
+test.X <- cbind(zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, black, lstat, medv)[test, ]
+train.crim01 <- crim01[train]
+# KNN
+set.seed(1)
+pred.knn <- knn(train.X, test.X, train.crim01, k = 10)
+table(pred.knn, crim01.test)
+mean(pred.knn != crim01.test)
+```
+
+*The error rate of KNN (k=10) is 11.06719%.*
