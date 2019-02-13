@@ -9,22 +9,37 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+# 5.8
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+We will now perform cross-validation on a simulated data set.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## (a)
 
-```{r cars}
-summary(cars)
+Generate a simulated data set as follows:
+
+```{r}
+set.seed (1)
+y=rnorm (100)
+x=rnorm (100)
+y=x-2* x^2+ rnorm (100)
 ```
 
-## Including Plots
+In this data set, what is n and what is p? Write out the model
+used to generate the data in equation form.
+
+
+
+# 6.2
 
 You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
+```{r}
 plot(pressure)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+# 6.10
+
+
+
