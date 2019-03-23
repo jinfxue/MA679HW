@@ -11,7 +11,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # 8.1
 
-
 ```{r}
 par(xpd = NA)
 plot(NA, NA, type = "n", xlim = c(0,100), ylim = c(0,100), xlab = "X", ylab = "Y")
@@ -41,10 +40,9 @@ text(x = 10, y = 75/2, labels = c("R6"))
 
 # 8.2
 
-You can also embed plots, for example:
+```{r}
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
